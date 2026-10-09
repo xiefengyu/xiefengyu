@@ -1,0 +1,980 @@
+/*
+ * 基于 MQTT 的工厂环境检测系统
+ * 风格：宫廷漆金 · 古风 · 华丽大气
+ *
+ * 覆盖本界面中的控件：
+ *   标题匾额、Connect、Publish / SubScribe、按键页、功能页、
+ *   温湿度 / 光照进度与阈值、RecvMessage、LogError、菜单与状态栏。
+ *
+ * 纯 QSS，不含关键帧，也不附带动画代码。
+ * 变化只写在样式状态里：:hover 提亮描金、:pressed 下压、
+ * :focus 金边、:checked 点亮、:disabled 褪色。
+ * 进度条在 alarm="true" 时改为朱砂告警色。
+ */
+
+/* ===================== 底色：绛漆深殿 ===================== */
+
+QMainWindow {
+    background-color: #120a08;
+}
+
+QWidget#centralwidget {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0    #3a1c16,
+        stop:0.22 #1c0e0b,
+        stop:0.55 #140c09,
+        stop:0.82 #2a1612,
+        stop:1    #4a2420);
+    color: #f6edd6;
+    font-family: "STKaiti", "KaiTi", "楷体", "Source Han Serif SC",
+                 "Noto Serif CJK SC", "Microsoft YaHei", "SimSun",
+                 "WenQuanYi Micro Hei";
+    font-size: 14px;
+}
+
+QWidget {
+    color: #f6edd6;
+    font-family: "STKaiti", "KaiTi", "楷体", "Source Han Serif SC",
+                 "Noto Serif CJK SC", "Microsoft YaHei", "SimSun",
+                 "WenQuanYi Micro Hei";
+}
+
+QWidget#layoutWidget,
+QWidget#layoutWidget_2 {
+    background: transparent;
+}
+
+/* 温湿度图、光照图所在的两块画框 */
+QWidget#verticalLayoutWidget,
+QWidget#verticalLayoutWidget_2 {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #2c1812,
+        stop:0.5 #16100c,
+        stop:1 #0e0908);
+    border: 2px solid #c6a15a;
+    border-radius: 16px;
+}
+
+QWidget#verticalLayoutWidget {
+    border-top: 3px solid #e7c98a;
+}
+
+QWidget#verticalLayoutWidget_2 {
+    border-top: 3px solid #f0d78c;
+}
+
+/* ===================== 标题匾额 ===================== */
+
+QLabel#label {
+    color: #fff6d4;
+    font-size: 30px;
+    font-weight: 700;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0    #1a0c0a,
+        stop:0.16 #6a2822,
+        stop:0.42 #a33b32,
+        stop:0.50 #c9a44a,
+        stop:0.58 #a33b32,
+        stop:0.84 #6a2822,
+        stop:1    #1a0c0a);
+    border: 1px solid #e6c875;
+    border-bottom: 4px solid #d4af37;
+    padding: 10px 40px 12px 40px;
+}
+
+/* ===================== 分组：描金边、居中匾题 ===================== */
+
+QGroupBox {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 rgba(72, 36, 28, 215),
+        stop:1 rgba(18, 10, 8, 230));
+    border: 2px solid #c6a15a;
+    border-radius: 14px;
+    margin-top: 18px;
+    padding: 18px 10px 10px 10px;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top center;
+    padding: 3px 22px 4px 22px;
+    color: #fff6d8;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #5c221c,
+        stop:0.5 #9a342c,
+        stop:1 #5c221c);
+    border: 1px solid #e8c872;
+    border-radius: 10px;
+}
+
+QGroupBox#groupBox {
+    border-color: #d4af37;
+}
+
+QGroupBox#groupBox_2 {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 rgba(28, 48, 46, 220),
+        stop:1 rgba(12, 16, 16, 235));
+    border-color: #c6a56a;
+}
+
+QGroupBox#groupBox_2::title {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #1e4540,
+        stop:0.5 #3d7a6e,
+        stop:1 #1e4540);
+}
+
+QGroupBox#groupBox_3 {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 rgba(92, 28, 24, 220),
+        stop:1 rgba(28, 8, 8, 235));
+    border-color: #e0b15a;
+}
+
+QGroupBox#groupBox_3::title {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #6e1c18,
+        stop:0.5 #c44536,
+        stop:1 #6e1c18);
+}
+
+/* ===================== 表单文字 ===================== */
+
+QLabel#label_2,
+QLabel#label_3,
+QLabel#label_4,
+QLabel#label_5,
+QLabel#label_6,
+QLabel#label_7,
+QLabel#label_8,
+QLabel#label_12,
+QLabel#label_14 {
+    color: #f3e2bc;
+    background: transparent;
+    font-size: 15px;
+    padding-right: 4px;
+}
+
+QLabel#label_temp,
+QLabel#label_hum,
+QLabel#label_light,
+QLabel#label_temp_yu,
+QLabel#label_hum_yu,
+QLabel#label_light_yu {
+    background: transparent;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 2px 6px;
+}
+
+QLabel#label_temp,
+QLabel#label_temp_yu {
+    color: #ffc2b0;
+}
+
+QLabel#label_hum,
+QLabel#label_hum_yu {
+    color: #c6f3ea;
+}
+
+QLabel#label_light,
+QLabel#label_light_yu {
+    color: #ffe7a3;
+}
+
+/* ===================== 宣纸输入框 ===================== */
+
+QLineEdit,
+QSpinBox,
+QDoubleSpinBox,
+QComboBox {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #fffaf1,
+        stop:1 #eadcc4);
+    color: #3a2416;
+    border: 1px solid #b8923a;
+    border-radius: 8px;
+    padding: 4px 10px;
+    min-height: 26px;
+    selection-background-color: #8c2f2f;
+    selection-color: #fff8e8;
+}
+
+QLineEdit:hover,
+QSpinBox:hover,
+QDoubleSpinBox:hover,
+QComboBox:hover {
+    border: 1px solid #e6c875;
+    background: #fffdf8;
+}
+
+QLineEdit:focus,
+QSpinBox:focus,
+QDoubleSpinBox:focus,
+QComboBox:focus {
+    border: 2px solid #d4af37;
+    background: #fffdf8;
+}
+
+QLineEdit:disabled,
+QSpinBox:disabled,
+QComboBox:disabled {
+    background: #d9d0c2;
+    color: #7a6a58;
+    border: 1px solid #a89880;
+}
+
+QSpinBox,
+QDoubleSpinBox {
+    padding-right: 22px;
+}
+
+QSpinBox::up-button,
+QDoubleSpinBox::up-button {
+    subcontrol-origin: border;
+    subcontrol-position: top right;
+    width: 20px;
+    border-left: 1px solid #b8923a;
+    border-top-right-radius: 7px;
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #f3e6c4, stop:1 #c6a15a);
+}
+
+QSpinBox::down-button,
+QDoubleSpinBox::down-button {
+    subcontrol-origin: border;
+    subcontrol-position: bottom right;
+    width: 20px;
+    border-left: 1px solid #b8923a;
+    border-bottom-right-radius: 7px;
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #c6a15a, stop:1 #8a6230);
+}
+
+QSpinBox::up-button:hover,
+QSpinBox::down-button:hover,
+QDoubleSpinBox::up-button:hover,
+QDoubleSpinBox::down-button:hover {
+    background: #fff1c2;
+}
+
+QSpinBox::up-button:pressed,
+QSpinBox::down-button:pressed,
+QDoubleSpinBox::up-button:pressed,
+QDoubleSpinBox::down-button:pressed {
+    background: #a6843e;
+}
+
+QSpinBox::up-arrow,
+QDoubleSpinBox::up-arrow {
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 6px solid #5c3b16;
+}
+
+QSpinBox::down-arrow,
+QDoubleSpinBox::down-arrow {
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 6px solid #5c3b16;
+}
+
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: center right;
+    width: 22px;
+    border-left: 1px solid #b8923a;
+    border-top-right-radius: 7px;
+    border-bottom-right-radius: 7px;
+    background: #c6a15a;
+}
+
+QComboBox QAbstractItemView {
+    background: #fffaf1;
+    color: #3a2416;
+    border: 1px solid #c6a15a;
+    selection-background-color: #8c2f2f;
+    selection-color: #fff8e8;
+    outline: 0;
+}
+
+/* 阈值旋钮略强调，方便现场调节 */
+QSpinBox#spinBox_temp_yu,
+QSpinBox#spinBox_hum_yu,
+QSpinBox#spinBox_light_yu {
+    min-width: 88px;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+QSpinBox#spinBox_temp_yu {
+    border: 1px solid #d4533a;
+}
+
+QSpinBox#spinBox_hum_yu {
+    border: 1px solid #3d8f86;
+}
+
+QSpinBox#spinBox_light_yu {
+    border: 1px solid #e0b422;
+}
+
+/* ===================== 按钮总式：印章按下感 ===================== */
+
+QPushButton {
+    color: #fff6d8;
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #a3453a,
+        stop:0.48 #7a2c26,
+        stop:1 #4e1814);
+    border: 2px solid #e0c070;
+    border-radius: 10px;
+    padding: 7px 16px;
+    font-size: 15px;
+    font-weight: 700;
+}
+
+QPushButton:hover {
+    color: #fffdf6;
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #c45c4e,
+        stop:0.5 #8e3830,
+        stop:1 #5c1e1a);
+    border: 2px solid #fff1b8;
+}
+
+QPushButton:pressed {
+    color: #f3e2bc;
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #3a1210,
+        stop:1 #6a2420);
+    border: 2px solid #a6843e;
+    padding-top: 9px;
+    padding-bottom: 5px;
+}
+
+QPushButton:disabled {
+    color: #8d7d6c;
+    background: #3a2c26;
+    border: 2px solid #6e5a46;
+}
+
+/* 连接：方印 */
+QPushButton#pushButton_connect {
+    min-width: 84px;
+    min-height: 32px;
+    border-radius: 6px;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #c44536,
+        stop:1 #6e1c18);
+    border: 2px solid #f0d78c;
+}
+
+QPushButton#pushButton_connect:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #e15a48,
+        stop:1 #8a2820);
+    border: 2px solid #fff6d0;
+}
+
+QPushButton#pushButton_connect:pressed {
+    background: #5c1614;
+}
+
+/* 发布：赤金 */
+QPushButton#pushButton_publish {
+    min-height: 34px;
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #f0d48a,
+        stop:0.45 #c6963a,
+        stop:1 #7a5418);
+    color: #3a2410;
+    border: 2px solid #fff1c2;
+}
+
+QPushButton#pushButton_publish:hover {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #fff3c8,
+        stop:0.5 #e0b14a,
+        stop:1 #8a621c);
+    color: #2a1808;
+}
+
+QPushButton#pushButton_publish:pressed {
+    background: #8a6218;
+    color: #fff6d8;
+}
+
+/* 订阅：青瓷 */
+QPushButton#pushButton_SubScribe {
+    min-height: 34px;
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #d7fff2,
+        stop:0.4 #5eae98,
+        stop:1 #1d4c42);
+    color: #06241e;
+    border: 2px solid #f0e0b0;
+}
+
+QPushButton#pushButton_SubScribe:hover {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #f4fffb,
+        stop:0.35 #7ed4ba,
+        stop:1 #246456);
+    border: 2px solid #fff6d0;
+}
+
+QPushButton#pushButton_SubScribe:pressed {
+    background: #163e36;
+    color: #e8fff8;
+}
+
+/* ===================== 按键页：宫灯 / 风扇 / 锁 ===================== */
+
+QPushButton#pushButton,
+QPushButton#pushButton_2,
+QPushButton#pushButton_3,
+QPushButton#pushButton_4,
+QPushButton#pushButton_5,
+QPushButton#pushButton_6 {
+    min-height: 52px;
+    font-size: 18px;
+    border-radius: 18px;
+    border-width: 2px;
+    padding: 8px 12px;
+}
+
+/* 开风扇 */
+QPushButton#pushButton_2 {
+    color: #f4fff9;
+    background: qradialgradient(cx:0.5, cy:0.18, radius:1.15,
+        stop:0 #f4fffb,
+        stop:0.28 #8fd8c2,
+        stop:0.72 #2f7a68,
+        stop:1 #143830);
+    border-color: #e8d7a4;
+}
+
+QPushButton#pushButton_2:hover {
+    background: qradialgradient(cx:0.5, cy:0.12, radius:1.05,
+        stop:0 #ffffff,
+        stop:0.25 #b6ffe6,
+        stop:0.7 #3d9a84,
+        stop:1 #184840);
+    border-color: #fff6d0;
+}
+
+QPushButton#pushButton_2:pressed,
+QPushButton#pushButton_2:checked {
+    color: #083028;
+    background: qradialgradient(cx:0.5, cy:0.35, radius:0.95,
+        stop:0 #ffffff,
+        stop:0.4 #9ae8d0,
+        stop:1 #d8fff2);
+    border: 3px solid #fff6d0;
+}
+
+/* 开灯1：宫灯暖黄 */
+QPushButton#pushButton_3 {
+    color: #3a2408;
+    background: qradialgradient(cx:0.5, cy:0.15, radius:1.1,
+        stop:0 #fff8dc,
+        stop:0.32 #f0c14a,
+        stop:0.7 #c47a22,
+        stop:1 #6a3810);
+    border-color: #fff1c0;
+}
+
+QPushButton#pushButton_3:hover {
+    background: qradialgradient(cx:0.5, cy:0.1, radius:1.0,
+        stop:0 #ffffff,
+        stop:0.28 #ffe08a,
+        stop:0.7 #e09a28,
+        stop:1 #8a4c12);
+}
+
+QPushButton#pushButton_3:pressed,
+QPushButton#pushButton_3:checked {
+    color: #3a2408;
+    background: qradialgradient(cx:0.5, cy:0.4, radius:0.9,
+        stop:0 #ffffff,
+        stop:0.45 #ffe7a3,
+        stop:1 #fff6d4);
+    border: 3px solid #fffdf0;
+}
+
+/* 开灯2：琥珀 */
+QPushButton#pushButton_4 {
+    color: #fff6e4;
+    background: qradialgradient(cx:0.5, cy:0.15, radius:1.1,
+        stop:0 #ffe8c0,
+        stop:0.34 #e08a28,
+        stop:0.72 #a35216,
+        stop:1 #4a240c);
+    border-color: #f0d090;
+}
+
+QPushButton#pushButton_4:hover {
+    background: qradialgradient(cx:0.5, cy:0.1, radius:1.0,
+        stop:0 #fff4dc,
+        stop:0.3 #f0a040,
+        stop:0.7 #c46a1c,
+        stop:1 #5c2c10);
+    border-color: #fff1c2;
+}
+
+QPushButton#pushButton_4:pressed,
+QPushButton#pushButton_4:checked {
+    color: #4a2808;
+    background: qradialgradient(cx:0.5, cy:0.4, radius:0.9,
+        stop:0 #fffaf0,
+        stop:0.5 #ffd08a,
+        stop:1 #ffe4b8);
+    border: 3px solid #fff6d8;
+}
+
+/* 开灯3：绛灯 */
+QPushButton#pushButton_5 {
+    color: #fff4ea;
+    background: qradialgradient(cx:0.5, cy:0.15, radius:1.1,
+        stop:0 #ffd8c4,
+        stop:0.32 #e06a48,
+        stop:0.7 #a33228,
+        stop:1 #4a1410);
+    border-color: #f0c8a0;
+}
+
+QPushButton#pushButton_5:hover {
+    background: qradialgradient(cx:0.5, cy:0.1, radius:1.0,
+        stop:0 #ffe8dc,
+        stop:0.3 #f08460,
+        stop:0.7 #c44434,
+        stop:1 #5c1a14);
+    border-color: #ffe7c4;
+}
+
+QPushButton#pushButton_5:pressed,
+QPushButton#pushButton_5:checked {
+    color: #4a160e;
+    background: qradialgradient(cx:0.5, cy:0.4, radius:0.9,
+        stop:0 #fff6f0,
+        stop:0.5 #ffb8a0,
+        stop:1 #ffd8c8);
+    border: 3px solid #fff0e4;
+}
+
+/* 开蜂鸣器：朱砂警印 */
+QPushButton#pushButton_6 {
+    color: #fff6f2;
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #e85a48,
+        stop:0.5 #b4231c,
+        stop:1 #6a1210);
+    border-color: #f0d090;
+}
+
+QPushButton#pushButton_6:hover {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #ff7864,
+        stop:0.5 #d23428,
+        stop:1 #8a1a16);
+    border-color: #fff1b8;
+}
+
+QPushButton#pushButton_6:pressed,
+QPushButton#pushButton_6:checked {
+    color: #fffdf8;
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #ff4d3a,
+        stop:1 #a31814);
+    border: 3px solid #ffe08a;
+}
+
+/* 开锁：青铜 */
+QPushButton#pushButton {
+    color: #fff8e8;
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #e6d2a4,
+        stop:0.35 #a68448,
+        stop:0.7 #6e5428,
+        stop:1 #3a2c16);
+    border-color: #f3e6c4;
+}
+
+QPushButton#pushButton:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+        stop:0 #fff1c8,
+        stop:0.4 #c6a15a,
+        stop:1 #4a381c);
+    border-color: #fffdf0;
+    color: #2a1c0c;
+}
+
+QPushButton#pushButton:pressed,
+QPushButton#pushButton:checked {
+    color: #3a2810;
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #fff6d8,
+        stop:1 #e6c888);
+    border: 3px solid #fffdf4;
+}
+
+/* ===================== 页签：册页 ===================== */
+
+QTabWidget::pane {
+    border: 2px solid #c6a15a;
+    border-radius: 12px;
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #2a1812,
+        stop:1 #120c0a);
+    top: -1px;
+}
+
+QTabWidget#tabWidget_2::pane {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #321c16,
+        stop:1 #140e0c);
+}
+
+QTabBar::tab {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #4a2c22,
+        stop:1 #2a1812);
+    color: #ead9b4;
+    border: 1px solid #a6843e;
+    border-bottom: none;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    min-width: 72px;
+    min-height: 28px;
+    padding: 6px 16px 5px 16px;
+    margin-right: 4px;
+    font-size: 14px;
+}
+
+QTabBar::tab:hover:!selected {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #6a4030,
+        stop:1 #3a2218);
+    color: #fff6d8;
+    border-color: #e0c070;
+}
+
+QTabBar::tab:selected {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #c45a48,
+        stop:1 #7a2822);
+    color: #fff8e8;
+    border: 1px solid #f0d78c;
+    font-weight: 700;
+}
+
+QTabBar::tab:pressed {
+    background: #5c1e1a;
+}
+
+/* 功能页留白，仍是同一套漆底，以后加控件会跟着全局样式走 */
+QWidget#tab,
+QWidget#tab_2,
+QWidget#tab_3,
+QWidget#tab_4 {
+    background: transparent;
+}
+
+/* ===================== 进度：温度 / 湿度 / 光照 ===================== */
+
+QProgressBar {
+    background: #1a100c;
+    border: 1px solid #c6a15a;
+    border-radius: 10px;
+    text-align: center;
+    color: #fff8e6;
+    min-height: 24px;
+    font-weight: 700;
+    font-size: 13px;
+}
+
+QProgressBar::chunk {
+    border-radius: 9px;
+    margin: 2px;
+}
+
+QProgressBar#progressBar_temp::chunk {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #7a1e1c,
+        stop:0.55 #d4533a,
+        stop:1 #f0c14a);
+}
+
+QProgressBar#progressBar_hum::chunk {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #163e48,
+        stop:0.55 #2f8f8a,
+        stop:1 #d4f3ee);
+}
+
+QProgressBar#progressBar_light::chunk {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #8a5a12,
+        stop:0.5 #e6b422,
+        stop:1 #fff3c0);
+}
+
+QProgressBar:hover {
+    border: 1px solid #ffe7a3;
+}
+
+/* 超阈值时在代码里 setProperty("alarm", "true")。
+   选择器必须带上对象名，否则会被上面的温度/湿度/光照配色盖住。 */
+QProgressBar#progressBar_temp[alarm="true"],
+QProgressBar#progressBar_hum[alarm="true"],
+QProgressBar#progressBar_light[alarm="true"] {
+    border: 2px solid #ff6a5a;
+    color: #fffdf8;
+}
+
+QProgressBar#progressBar_temp[alarm="true"]::chunk,
+QProgressBar#progressBar_hum[alarm="true"]::chunk,
+QProgressBar#progressBar_light[alarm="true"]::chunk {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #6b1010,
+        stop:0.55 #e03020,
+        stop:1 #ffb0a4);
+}
+
+/* ===================== 报文与日志：卷轴 ===================== */
+
+QListWidget,
+QListView,
+QTreeView,
+QTableView,
+QTextEdit,
+QPlainTextEdit {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #1c1410,
+        stop:1 #0c0807);
+    color: #f4e6cc;
+    border: 1px solid #8d6a32;
+    border-radius: 10px;
+    padding: 6px;
+    outline: 0;
+    alternate-background-color: #241812;
+}
+
+QListWidget::item,
+QListView::item,
+QTreeView::item {
+    padding: 7px 10px;
+    border-radius: 6px;
+    margin: 2px 0;
+    color: #f6edd6;
+}
+
+QListWidget::item:hover,
+QListView::item:hover,
+QTreeView::item:hover {
+    background: rgba(212, 175, 55, 55);
+    color: #fffaf0;
+}
+
+QListWidget::item:selected,
+QListView::item:selected,
+QTreeView::item:selected {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #8c2f2f,
+        stop:1 #c6a15a);
+    color: #fffaf0;
+}
+
+QListWidget#listWidget_message {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #142220,
+        stop:1 #0c1010);
+    border: 1px solid #7d9a86;
+    color: #e7fff6;
+}
+
+QListWidget#listWidget_message::item:hover {
+    background: rgba(94, 174, 152, 70);
+}
+
+QListWidget#listWidget_message::item:selected {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #1d4c42,
+        stop:1 #c6a15a);
+}
+
+QListWidget#listWidget_LogError {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #2a1210,
+        stop:1 #120808);
+    border: 1px solid #c44536;
+    color: #ffd8cc;
+}
+
+QListWidget#listWidget_LogError::item:hover {
+    background: rgba(196, 69, 54, 90);
+}
+
+QListWidget#listWidget_LogError::item:selected {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #a32020,
+        stop:1 #e0b15a);
+    color: #fff8f4;
+}
+
+QHeaderView::section {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+        stop:0 #6a2822, stop:1 #3a1612);
+    color: #fff6d8;
+    border: 1px solid #c6a15a;
+    padding: 6px;
+    font-weight: 700;
+}
+
+/* ===================== 滚动条：金箍 ===================== */
+
+QScrollBar:vertical {
+    background: #140e0c;
+    width: 12px;
+    margin: 2px;
+    border-radius: 6px;
+}
+
+QScrollBar:horizontal {
+    background: #140e0c;
+    height: 12px;
+    margin: 2px;
+    border-radius: 6px;
+}
+
+QScrollBar::handle:vertical,
+QScrollBar::handle:horizontal {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #8a6230,
+        stop:0.5 #f0d78c,
+        stop:1 #8a6230);
+    border-radius: 5px;
+    min-height: 28px;
+    min-width: 28px;
+}
+
+QScrollBar::handle:vertical:hover,
+QScrollBar::handle:horizontal:hover {
+    background: #fff1c2;
+}
+
+QScrollBar::handle:vertical:pressed,
+QScrollBar::handle:horizontal:pressed {
+    background: #a6843e;
+}
+
+QScrollBar::add-line,
+QScrollBar::sub-line,
+QScrollBar::add-page,
+QScrollBar::sub-page {
+    background: transparent;
+    height: 0;
+    width: 0;
+    border: none;
+}
+
+/* ===================== 菜单、状态栏、提示 ===================== */
+
+QMenuBar {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #1a0e0b, stop:0.5 #2a1612, stop:1 #1a0e0b);
+    color: #f3e6c8;
+    border-bottom: 1px solid #c6a15a;
+    padding: 2px;
+}
+
+QMenuBar::item {
+    background: transparent;
+    padding: 4px 12px;
+    border-radius: 6px;
+}
+
+QMenuBar::item:selected,
+QMenuBar::item:pressed {
+    background: #8c2f2f;
+    color: #fff8e8;
+}
+
+QMenu {
+    background: #2a1812;
+    color: #f6edd6;
+    border: 1px solid #c6a15a;
+    padding: 4px;
+}
+
+QMenu::item {
+    padding: 6px 22px;
+    border-radius: 6px;
+}
+
+QMenu::item:selected {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+        stop:0 #8c2f2f, stop:1 #c6a15a);
+    color: #fffaf0;
+}
+
+QStatusBar {
+    background: #120a08;
+    color: #e8d5a3;
+    border-top: 1px solid #c6a15a;
+}
+
+QStatusBar::item {
+    border: none;
+}
+
+QToolTip {
+    background: #3a2218;
+    color: #fff6d8;
+    border: 1px solid #e6c875;
+    border-radius: 6px;
+    padding: 4px 8px;
+}
+
+QCheckBox,
+QRadioButton {
+    color: #f6edd6;
+    spacing: 8px;
+    background: transparent;
+}
+
+QCheckBox::indicator,
+QRadioButton::indicator {
+    width: 16px;
+    height: 16px;
+    border: 1px solid #c6a15a;
+    background: #1a100c;
+}
+
+QCheckBox::indicator {
+    border-radius: 3px;
+}
+
+QRadioButton::indicator {
+    border-radius: 8px;
+}
+
+QCheckBox::indicator:hover,
+QRadioButton::indicator:hover {
+    border: 1px solid #fff1b8;
+}
+
+QCheckBox::indicator:checked,
+QRadioButton::indicator:checked {
+    background: qradialgradient(cx:0.5, cy:0.4, radius:0.8,
+        stop:0 #fff6d0, stop:1 #c44536);
+    border: 1px solid #fff1b8;
+}

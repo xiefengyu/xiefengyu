@@ -6,13 +6,10 @@
  *   标题匾额、Connect、Publish / SubScribe、按键页、功能页、
  *   温湿度 / 光照进度与阈值、RecvMessage、LogError、菜单与状态栏。
  *
- * 动态效果（QSS 能表达的部分）：
- *   :hover 提亮描金、:pressed 下压、:focus 金边、:checked 点亮、
- *   :disabled 褪色，以及自定义属性 glow / alarm 的呼吸与告警。
- * Qt 样式表没有 CSS 动画，呼吸光与告警切换见文件末尾的用法。
- *
- * 使用前请设置 Fusion 风格，否则系统原生样式会丢掉圆角和渐变：
- *   a.setStyle(QStyleFactory::create("Fusion"));
+ * 纯 QSS，不含关键帧，也不附带动画代码。
+ * 变化只写在样式状态里：:hover 提亮描金、:pressed 下压、
+ * :focus 金边、:checked 点亮、:disabled 褪色。
+ * 进度条在 alarm="true" 时改为朱砂告警色。
  */
 
 /* ===================== 底色：绛漆深殿 ===================== */
@@ -83,20 +80,6 @@ QLabel#label {
     border: 1px solid #e6c875;
     border-bottom: 4px solid #d4af37;
     padding: 10px 40px 12px 40px;
-}
-
-/* 配合末尾计时器，匾额在两态之间呼吸 */
-QLabel#label[glow="1"] {
-    color: #fffdf3;
-    border-bottom: 4px solid #fff1b8;
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-        stop:0    #2a1210,
-        stop:0.16 #8a342c,
-        stop:0.42 #c45042,
-        stop:0.50 #ffe7a3,
-        stop:0.58 #c45042,
-        stop:0.84 #8a342c,
-        stop:1    #2a1210);
 }
 
 /* ===================== 分组：描金边、居中匾题 ===================== */
@@ -995,47 +978,3 @@ QRadioButton::indicator:checked {
         stop:0 #fff6d0, stop:1 #c44536);
     border: 1px solid #fff1b8;
 }
-
-/*
- * ===================== 用法 =====================
- *
- * 1. 把本文件放在桌面，工程里这样加载（路径按自己的用户名改）：
- *
- *    #include <QFile>
- *    #include <QStyleFactory>
- *
- *    a.setStyle(QStyleFactory::create("Fusion"));
- *    QFile qss(QStringLiteral("C:/Users/你的用户名/Desktop/基于Mqtt的工厂环境检测系统_古风.qss"));
- *    if (qss.open(QFile::ReadOnly | QFile::Text))
- *        a.setStyleSheet(QString::fromUtf8(qss.readAll()));
- *
- * 2. 标题匾额呼吸（约 0.9 秒一拍）。写在 MainWindow 构造函数末尾：
- *
- *    auto *glow = new QTimer(this);
- *    connect(glow, &QTimer::timeout, this, [this] {
- *        auto *title = findChild<QLabel *>("label");
- *        if (!title) return;
- *        const bool on = title->property("glow").toString() != "1";
- *        title->setProperty("glow", on ? "1" : "0");
- *        title->style()->unpolish(title);
- *        title->style()->polish(title);
- *        title->update();
- *    });
- *    glow->start(900);
- *
- * 3. 按键做成开关灯：构造时 setCheckable(true)。
- *    按下后 :checked 会变成“点亮”的一圈金边。文字仍由你的槽函数在
- *    “开风扇 / 关风扇”之间切换，样式不用改。
- *
- * 4. 读数超过阈值时点亮告警框。每次收到 MQTT 报文后：
- *
- *    auto mark = [](QProgressBar *bar, bool alarm) {
- *        bar->setProperty("alarm", alarm ? "true" : "false");
- *        bar->style()->unpolish(bar);
- *        bar->style()->polish(bar);
- *        bar->update();
- *    };
- *    mark(ui->progressBar_temp,  temp  > ui->spinBox_temp_yu->value());
- *    mark(ui->progressBar_hum,   hum   > ui->spinBox_hum_yu->value());
- *    mark(ui->progressBar_light, light > ui->spinBox_light_yu->value());
- */
